@@ -87,5 +87,76 @@ public class BSTMap<K extends Comparable<K>, V> implements Map<K, V> {
         node.value = newValue;
     }
 
+    // 范湖以node为根的二叉树树最小值所在的节点
+    private Node minimum (Node node) {
+        if (node.left == null) {
+            return node;
+        }
+        return minimum(node.left);
+    }
+
+    // 删除以node为根的二叉树的最小节点
+    // 返回删除节点后新的二叉树的根
+    private Node removeMin (Node node) {
+        if (node.left == null) {
+            Node rightNode = node.right;
+            node.right = null;
+            size--;
+            return rightNode;
+        }
+        node.left = removeMin(node.left);
+        return node;
+    }
+
+    // 从二分搜索树中删除 key 的节点
+    @public V remove (K key) {
+        Node node = getNode(root, key);
+        if (node != null) {
+            root = removeMin(root, key);
+            return node.value;
+        }
+        return null;
+    }
+
+    // 删除以 node 为根的二叉树中 key 的节点， 递归算法
+    // 返回删除节点后新的二叉树的根
+    private Node remove (Node node, K key) {
+        if (node == null) {
+            return null;
+        }
+
+        if (key.compareTo(node.key) < 0) {
+            node.left = remove(node.left, key);
+        } else if (key.compareTo(node.key) > 0) {
+            node.right = remove(node.right, key);
+        } else {
+            // 待删节点左子树为空
+            if (node.left == null) {
+                Node rightNode = node.right;
+                node.right = null;
+                size--;
+                return rightNode;
+            }
+
+            // 待删除节点右子树为空
+            if (node.right == null) {
+                Node leftNode = node.left;
+                node.left = null;
+                size--;
+                return leftNode;
+            }
+
+            // 待删除节点的左右子树都不为空
+            // 找到比这个节点大的最小节点，待删除节点的右子树的最小节点
+            // 用这个比待删节点大的最小节点替代待删除节点
+            Node successor = minimum(node.right);
+            successor.right = removeMin(node.right);
+            successor.left = removeMin(node.left);
+
+            node.left = node.right = null;
+
+            return successor;
+        }
+    }
 
 }
